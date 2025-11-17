@@ -3,7 +3,7 @@
 
 ## Background
 
-The `SeeXM-EIP2535` is an EIP-2535 base smart contract framework that currently includes `PMApp` and `TokenUnlockerApp` contracts.
+The `SeeX-EIP2535` is an EIP-2535 base smart contract framework that currently includes `PMApp` and `TokenUnlockerApp` contracts.
 
 The `PMApp` is an exchange protocol that facilitates atomic swaps between `Conditional ERC1155 NFT Token` assets and an ERC20 collateral asset.
 
@@ -13,11 +13,11 @@ The `TokenUnlockerApp` is a contract that provide users to invest/refund, stake/
 
 ## Documentation
 
-This project introduces the core smart contracts for the SeeXMarket and TokenUnlocker applications, built on the EIP-2535 diamond standard. The contracts include:
+This project introduces the core smart contracts for the PMApp and TokenUnlocker applications, built on the EIP-2535 diamond standard. The contracts include:
 
 1. Diamond proxy and facet infrastructure
 2. Core functionality facets (AccessControl, ERC1155, EIP712, Pausable, etc.)
-3. SeeXMarketApp with order matching, market management, and admin features
+3. PMApp with order matching, market management, and admin features
 4. TokenUnlockerApp with staking, voting, vault management, and token distribution
 
 The implementation follows best practices for upgradeable contracts and includes comprehensive storage layouts, interfaces, and base contracts to support the diamond pattern. Key features include:
