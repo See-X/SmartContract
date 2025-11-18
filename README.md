@@ -41,5 +41,5 @@ These contracts have been audited by QuillAudits and the report is available [he
 
 | Contract          | Address                                                                           |
 | ---------------- | --------------------------------------------------------------------------------- |
-| TokenUnlockerApp | []()|
-| SESToken         | []()|
+| TokenUnlockerApp | [0xdb51eD8491C4c2B1737C4F1581368C7E76c5aB23](https://bscscan.com/address/0xdb51eD8491C4c2B1737C4F1581368C7E76c5aB23)|
+| SESToken         | [0x468192Fa74320C307161D4d528588C0e36e11Ccc](https://bscscan.com/address/0x468192Fa74320C307161D4d528588C0e36e11Ccc)|
