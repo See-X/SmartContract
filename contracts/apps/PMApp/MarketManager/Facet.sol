@@ -64,9 +64,10 @@ contract MarketManagerFacet is Facet, AccessControlBase, MarketManagerBase, TTOQ
         uint256 amount = _ds._balances[nftId][user];
         if (amount == 0) revert NoNftOwned(nftId, user);
 
-        // should disable nft transfer if the market is end/blocked/finallized （defined in the _checkStatus func in TuringMarketFacet.sol）
+        // should disable nft transfer if the market is end/blocked/finallized （defined in the _checkStatus func in ERC1155.sol）
         // so the calc reward is correct
-        s.marketWinnerPayAmountMap[marketId][paymentTokenAddress] += amount;
+        uint256 winnerPaymentAmount = amount * (10 ** (IERC20(paymentTokenAddress).decimals() - 6));
+        s.marketWinnerPayAmountMap[marketId][paymentTokenAddress] += winnerPaymentAmount;
         if (s.marketWinnerPayAmountMap[marketId][paymentTokenAddress] > s.marketVaultMap[marketId][paymentTokenAddress])
             revert MarketVaultNotEnoughForPayReward(
                 marketId,
@@ -76,10 +77,10 @@ contract MarketManagerFacet is Facet, AccessControlBase, MarketManagerBase, TTOQ
                 paymentTokenAddress
             );
 
-        if (reward.feeAmount > (amount * s.maxFeeRateBps) / 10000) revert MaxFeeExceeded(reward.nonce, amount, reward.feeAmount, s.maxFeeRateBps);
+        if (reward.feeAmount > (winnerPaymentAmount * s.maxFeeRateBps) / 10000) revert MaxFeeExceeded(reward.nonce, winnerPaymentAmount, reward.feeAmount, s.maxFeeRateBps);
 
         s.feeVaultAmountMap[paymentTokenAddress] += reward.feeAmount;
-        uint256 transferAmount = amount - reward.feeAmount;
+        uint256 transferAmount = winnerPaymentAmount - reward.feeAmount;
         _tokenTransferOutQuoteCheck("claimReward", paymentTokenAddress, transferAmount);
         bool paymentResult = IERC20(paymentTokenAddress).transfer(user, transferAmount);
         if (!paymentResult) revert RewardTransferFailed(reward, paymentTokenAddress, amount, reward.feeAmount);

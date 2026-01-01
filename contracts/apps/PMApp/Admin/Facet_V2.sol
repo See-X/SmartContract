@@ -8,8 +8,8 @@ import "../../../utils/IERC20.sol";
 import {TTOQManagerBase} from "../../../facets/TTOQManager/Base.sol";
 import {AccessControlBase} from "../../../facets/AccessControl/Base.sol";
 
-contract AdminFacet is IAdminFacet, AdminBase, AccessControlBase, TTOQManagerBase, Facet {
-    function AdminFacet_init(uint8 roleA, uint8 roleB, uint8 roleC) external onlyInitializing {
+contract AdminFacet_V2 is IAdminFacet, AdminBase, AccessControlBase, TTOQManagerBase, Facet {
+    function AdminFacet_V2_init(uint8 roleA, uint8 roleB, uint8 roleC) external onlyInitializing {
         _setFunctionAccess(this.setPayment.selector, roleA, true);
         _setFunctionAccess(this.setMaxSlippageBps.selector, roleA, true);
         _setFunctionAccess(this.setFeeToken.selector, roleA, true);

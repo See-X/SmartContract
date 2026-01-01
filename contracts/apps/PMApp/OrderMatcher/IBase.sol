@@ -113,7 +113,7 @@ interface IOrderMatcherBase is IAppStorage {
         address user,
         address paymentTokenAddress
     );
-    error RewardTransferFailed(Reward reward, address paymentTokenAddress, uint256 amount, uint256 paymentTokenFeeAmount);
+    error RewardTransferFailed(Reward reward, address paymentTokenAddress, uint256 nftAmount, uint256 paymentTokenFeeAmount);
     error MarketVaultBalanceInsufficient(uint256 available, uint256 required);
     error NonceAlreadyUsed(uint256 nonce);
 }

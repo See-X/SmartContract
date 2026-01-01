@@ -7,10 +7,14 @@ import {IMatchOrderSelfFacet} from "./IFacet.sol";
 import "../../../utils/IERC20.sol";
 import {AccessControlBase} from "../../../facets/AccessControl/Base.sol";
 
-contract MatchOrderSelfFacet is IMatchOrderSelfFacet, MatchOrderSelfBase, AccessControlBase, Facet {
-    function MatchOrderSelfFacet_init(uint8 roleB) external onlyInitializing {
+contract MatchOrderSelfFacet_V2 is IMatchOrderSelfFacet, MatchOrderSelfBase, AccessControlBase, Facet {
+    function MatchOrderSelfFacet_V2_init(uint8 roleB) external onlyInitializing {
         _setFunctionAccess(this.matchOrderSelf.selector, roleB, true);
         _addInterface(type(IMatchOrderSelfFacet).interfaceId);
+    }
+
+    function MatchOrderSelf_version() external pure returns (string memory) {
+        return "V2";
     }
 
     function matchOrderSelf(OrderSelf memory order) external whenNotPaused protected nonReentrant {

@@ -59,6 +59,8 @@ interface IAppStorage {
         bool canRefund;
         uint256 canRefundDuration;
         bool hasRefunded;
+        bool isConditionalUnlocked; // whether it is a conditional unlocking schedule
+        bool isAngel;
     }
 
     struct StakeSchedule {

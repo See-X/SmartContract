@@ -12,7 +12,7 @@ interface IMarketManagerBase is IOrderMatcherBase {
         uint256 nftId,
         address indexed user,
         address paymentTokenAddress,
-        uint256 amount,
+        uint256 nftAmount,
         uint256 paymentTokenFeeAmount
     );
     event TokenWithdrawn(address indexed from, address indexed to, address tokenAddress, uint256 amount);

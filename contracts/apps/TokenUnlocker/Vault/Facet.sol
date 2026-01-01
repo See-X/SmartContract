@@ -13,6 +13,7 @@ contract VaultFacet is IVaultFacet, VaultBase, AccessControlBase, TTOQManagerBas
         // A Level Security role
         _setFunctionAccess(this.adminWithdrawPaymentToken.selector, roleA, true);
         _setFunctionAccess(this.adminUpdateVaultOperator.selector, roleA, true);
+        _setFunctionAccess(this.adminUpdateConditionalUnlockedBps.selector, roleA, true);
         // B Level Security role
         _setFunctionAccess(this.investToken.selector, roleB, true);
         _setFunctionAccess(this.allocateLinearUnlockedTokens.selector, roleB, true);
@@ -40,6 +41,12 @@ contract VaultFacet is IVaultFacet, VaultBase, AccessControlBase, TTOQManagerBas
         require(vaultId < s.vaultsCount, "Invalid vault id");
         s.vaultsMap[vaultId].operator = operator;
         emit VaultOperatorUpdated(vaultId, operator);
+    }
+
+    function adminUpdateConditionalUnlockedBps(uint256 bps) external whenNotPaused protected {
+        require(bps <= 10000, "Invalid bps");
+        s.canConditionalUnlockedBps = bps;
+        emit ConditionalUnlockedBpsUpdated(bps);
     }
 
     function createVault(Vault memory vault_) external whenNotPaused protected nonReentrant returns (uint256 vaultId) {
@@ -87,7 +94,8 @@ contract VaultFacet is IVaultFacet, VaultBase, AccessControlBase, TTOQManagerBas
     function investToken(
         AllocateParams memory allocateParams,
         bytes memory userSig,
-        bytes memory operatorSig
+        bytes memory operatorSig,
+        bool isAngel
     ) external protected whenNotPaused nonReentrant {
         uint256 vaultId = allocateParams.vaultId;
         address userAddress = allocateParams.userAddress;
@@ -98,7 +106,7 @@ contract VaultFacet is IVaultFacet, VaultBase, AccessControlBase, TTOQManagerBas
         uint256 canRefundDuration = allocateParams.canRefundDuration;
         uint256 nonce = allocateParams.nonce;
         require(tokenAmount > 0 && paymentAmount > 0, "Invalid token amount or payment amount");
-        require(tokenAmount <= paymentAmount * 2 * 1e13, "Token price must be at least 0.05");
+        require(paymentAmount >= tokenAmount * 3 / 100, "Token price must be at least 0.03"); // paymentAmount >=0.03 * tokenAmount, both decimals are 18
         _useNonce(userAddress, nonce);
         _validateVault(vaultId, VaultType.Vc);
 
@@ -135,7 +143,7 @@ contract VaultFacet is IVaultFacet, VaultBase, AccessControlBase, TTOQManagerBas
         _verifySignature(vault.operator, operatorSig, encodedDataOperator);
 
         require(IERC20(vault.paymentTokenAddress).transferFrom(userAddress, address(this), paymentAmount), "Transfer payment token failed");
-        _allocateTokens(allocateParams);
+        _allocateTokens(allocateParams, false, isAngel);
 
         s.totalInvestTokenAmount += tokenAmount;
         s.userInvestAmount[userAddress] += tokenAmount;
@@ -155,7 +163,8 @@ contract VaultFacet is IVaultFacet, VaultBase, AccessControlBase, TTOQManagerBas
 
     function allocateLinearUnlockedTokens(
         AllocateParams memory allocateParams,
-        bytes memory operatorSig
+        bytes memory operatorSig,
+        bool isConditionalUnlock
     ) external protected whenNotPaused nonReentrant {
         uint256 vaultId = allocateParams.vaultId;
         address userAddress = allocateParams.userAddress;
@@ -189,7 +198,7 @@ contract VaultFacet is IVaultFacet, VaultBase, AccessControlBase, TTOQManagerBas
         );
         _verifySignature(vault.operator, operatorSig, encodedDataOperator);
         _useNonce(vault.operator, nonce);
-        _allocateTokens(allocateParams);
+        _allocateTokens(allocateParams, isConditionalUnlock, false);
 
         s.userVotingPowerMap[userAddress] += tokenAmount;
         s.totalVotingPower += tokenAmount;
@@ -244,7 +253,7 @@ contract VaultFacet is IVaultFacet, VaultBase, AccessControlBase, TTOQManagerBas
         bytes memory encodedDataOperator = abi.encode(TYPEHASH_PAYOUT_AND_LOCK, vaultId, userAddress, tokenAmount, keccak256(bytes(reason)), nonce);
         _verifySignature(vault.operator, operatorSig, encodedDataOperator);
         _tokenTransferOutQuoteCheck("payoutToken", vault.tokenAddress, tokenAmount);
-        _allocateTokens(allocateParams);
+        _allocateTokens(allocateParams, false, false);
         emit TokenPaid(vaultId, userAddress, tokenAmount, reason, nonce, vault.operator);
     }
 

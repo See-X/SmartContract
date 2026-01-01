@@ -7,12 +7,32 @@ import {EIP712Base} from "../../../facets/EIP712/Base.sol";
 import {UserNonceBase} from "../../../facets/UserNonce/Base.sol";
 
 abstract contract VaultBase is AppStorage, IVaultBase, UserNonceBase, EIP712Base {
-    function _calcCanUnlockedAmount(UnlockedSchedule memory schedule, uint256 timestamp) internal pure returns (uint256) {
+    function _calcAngelUnlockedAmount(UnlockedSchedule memory schedule, uint256 timestamp) internal pure returns (uint256) {
+        // The first 60 days is locked
+        uint256 unlockingStartTime = schedule.startTime + 60 days;
+        if (unlockingStartTime > timestamp) {
+            return 0;
+        }
+
+        uint256 elapsed = timestamp - unlockingStartTime;
+        uint256 daysPassed = elapsed / 1 days;
+        uint256 unlockedAmount = (schedule.allocationAmount * daysPassed) / 330 days;
+        return unlockedAmount > schedule.allocationAmount ? schedule.allocationAmount : unlockedAmount;
+    }
+
+    function _calcCanUnlockedAmount(UnlockedSchedule memory schedule, uint256 timestamp) internal view returns (uint256) {
         if (schedule.canRefund) {
             return 0;
         }
+        if (schedule.isAngel) {
+            return _calcAngelUnlockedAmount(schedule, timestamp);
+        }
+
+        if (schedule.isConditionalUnlocked) {
+            return (schedule.allocationAmount * s.canConditionalUnlockedBps) / 10000;
+        }
         // The first year is locked
-        uint256 unlockingStartTime = schedule.startTime + 360 days;
+        uint256 unlockingStartTime = schedule.startTime + 180 days;
         if (unlockingStartTime > timestamp) {
             return 0;
         }
@@ -44,7 +64,7 @@ abstract contract VaultBase is AppStorage, IVaultBase, UserNonceBase, EIP712Base
         require(s.vaultsMap[vaultId].vaultType == vaultType, "Invalid vault type");
     }
 
-    function _allocateTokens(AllocateParams memory allocateParams) internal {
+    function _allocateTokens(AllocateParams memory allocateParams, bool isConditionalUnlocked, bool isAngel) internal {
         uint256 vaultId = allocateParams.vaultId;
         Vault storage vault = s.vaultsMap[vaultId];
         uint256 startTime = block.timestamp;
@@ -69,7 +89,9 @@ abstract contract VaultBase is AppStorage, IVaultBase, UserNonceBase, EIP712Base
             isShareRevenue: isShareRevenue,
             canRefund: allocateParams.canRefund,
             canRefundDuration: allocateParams.canRefundDuration,
-            hasRefunded: false
+            hasRefunded: false,
+            isConditionalUnlocked: isConditionalUnlocked,
+            isAngel: isAngel
         });
 
         uint256 scheduleIndex = s.unlockedSchedulesCount;

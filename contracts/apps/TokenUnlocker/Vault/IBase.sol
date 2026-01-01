@@ -25,4 +25,5 @@ interface IVaultBase is IAppStorage {
         UnlockedSchedule schedule
     );
     event TokenClaimed(uint256 indexed vaultId, address indexed to, uint256 amount, uint256 startTime, uint256 duration, uint256 timestamp);
+    event ConditionalUnlockedBpsUpdated(uint256 bps);
 }

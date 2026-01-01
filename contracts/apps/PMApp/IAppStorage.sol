@@ -11,6 +11,7 @@ interface IAppStorage {
         uint256 stakingDividends;
         uint256 riskReserve;
         uint256 operatingCosts;
+        uint256 marketMakerReward;
     }
 
     enum PayoutType {
@@ -19,7 +20,8 @@ interface IAppStorage {
         buyBackBurnFund,
         stakingDividendsFund,
         riskReserveFund,
-        operatingCostsFund
+        operatingCostsFund,
+        marketMakerRewardFund
     }
 
     enum OrderSide {

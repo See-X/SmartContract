@@ -8,6 +8,7 @@ contract AppStorage is IAppStorage {
         uint256 vaultsCount;
         mapping(uint256 => Vault) vaultsMap;
         uint256 unlockedSchedulesCount;
+        uint256 canConditionalUnlockedBps; // The percentage of tokens that can be unlocked for the projectReserve vault
         mapping(uint256 => UnlockedSchedule) unlockedSchedulesMap;
         mapping(address => uint256[]) userUnlockedScheduleIdsMap; // user => scheduleId[]: All unlock plans for the user
         mapping(address => uint256) userInvestAmount; // user => amount: The total amount of user's cumulative investment
